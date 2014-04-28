@@ -24,6 +24,37 @@ int cpuinfo() {
 	return cpuInfo;
 }
 
+int meminfo() {
+	//MEMLOAD
+	FILE *f;
+	char buf[100];
+	int memTotal, memFree, memUse, buffers, cached;
+	
+	f = fopen("/proc/meminfo", "r");	
+	
+	if (!f) {
+		perror("open (/proc/meminfo)");
+		close(f);
+		return 1;
+	}
+
+	fgets(buf, sizeof(buf) - 1, f); 
+	sscanf(buf, "%*s%d", &memTotal);
+	fgets(buf, sizeof(buf) - 1, f);
+	sscanf(buf, "%*s%d", &memFree);
+	fgets(buf, sizeof(buf) - 1, f); 
+	sscanf(buf, "%*s%d", &buffers);
+	fgets(buf, sizeof(buf) - 1, f); 
+	sscanf(buf, "%*s%d", &cached);
+	
+	memUse = memTotal - memFree - buffers - cached;
+	//Если MemTotal = 100%, тогда MemUse = ....
+	memUse = memUse * 100 / memTotal;
+	
+	fclose(f);
+	return memUse;
+}
+
 int main() {
 	struct sockaddr_in c_addr;
 	int sock;
