@@ -3,6 +3,27 @@
 #include <netinet/in.h>
 #include <stdio.h>
 
+int cpuinfo() {
+	//CPULOAD
+	FILE *f;
+	char buf[100];
+	float cpuInfo;
+	
+	f = fopen("/proc/loadavg", "r");
+	if (!f) {
+		perror("open (/proc/loadavg)");
+		close(f);
+		return 1;
+	}
+	
+	fscanf(f, "%s", buf);
+	sscanf(buf, "%f", &cpuInfo);
+	cpuInfo = cpuInfo * 100;
+	fclose(f);
+	
+	return cpuInfo;
+}
+
 int main() {
 	struct sockaddr_in c_addr;
 	int sock;
