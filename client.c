@@ -2,6 +2,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <string.h>
+
 
 int cpuinfo() {
 	//CPULOAD
@@ -53,6 +55,41 @@ int meminfo() {
 	
 	fclose(f);
 	return memUse;
+}
+
+int diskinfo() {
+	//DiskUsage
+	FILE *f;
+	char buf[200];
+	int i = 0;
+	int diskState;
+	char *p1;
+	
+	system("df -h > DiskInfo.txt");
+	f = fopen("DiskInfo.txt", "r");
+	if (!f) {
+		perror("open (DiskInfo.txt)");
+		close(f);
+		return 1;
+	}
+		
+	for(i = 0; i < 2; i++) {
+		fgets(buf, sizeof(buf) - 1, f);
+		
+		if (i == 1) {
+			p1 = strchr(buf, '%');
+			*p1 = 0;
+			while (*p1 != ' ') {
+				p1--;
+			}
+		}
+							
+	}
+	
+	diskState = atoi(p1);
+	fclose(f);
+	 
+	return diskState;
 }
 
 int main() {
