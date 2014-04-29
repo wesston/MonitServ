@@ -135,10 +135,11 @@ char* techstat() {
 }
 
 int main() {
-
+	char const *SWITCHOFF = "off";
+	char const *TECHSTAT = "techstat";
 	struct sockaddr_in c_addr;
 	int sock;
-	char buf[100], word[20];
+	char buf[100];
 	
 	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 0) {
@@ -155,11 +156,13 @@ int main() {
 	}
 	
 	while(1) {
-		printf("Введите слово для отправки\n");
-		scanf("%s", word);
-		send(sock, word, sizeof(word), 0);
-		recv(sock, buf, sizeof(word), 0);
-		printf("%s\n\n", buf);
+		recv(sock, buf, sizeof(buf), 0);	
+		
+		if(strcmp(buf, TECHSTAT) == 0) {
+			puts("Сервер запросил статистику!");
+			char const *STAT = techstat();
+			send(sock, STAT, strlen(STAT) + 1, 0);
+		}
 	}
 	
 	close(sock);
