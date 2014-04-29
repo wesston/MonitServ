@@ -3,7 +3,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 int cpuinfo() {
 	//CPULOAD
@@ -92,7 +92,39 @@ int diskinfo() {
 	return diskState;
 }
 
+char* uptime() {
+	FILE *f;
+	char buf[50];
+	char *p1, *p2, *uptime;
+	int len;
+	
+	
+	system("uptime > uptime.txt");
+	f = fopen("uptime.txt", "r");
+	if (!f) {
+		perror("open (uptime.txt)");
+		close(f);
+	}
+	
+	fgets(buf, sizeof(buf) - 1, f);
+	p1 = strstr(buf, "up");
+	p1 = p1 + 3;
+	p2 = strchr(p1, ',');
+	len = p2 - p1;
+	
+	uptime = (char *) malloc(20 * sizeof(char));
+	if(uptime == NULL) {
+		printf("Требуемая память не выделена.\n");
+		exit(1);
+	}
+	
+	strncpy(uptime, p1, len);	
+    
+    return uptime;
+}
+
 int main() {
+
 	struct sockaddr_in c_addr;
 	int sock;
 	char buf[100], word[20];
@@ -120,5 +152,7 @@ int main() {
 	}
 	
 	close(sock);
+	
+		
 	return 0;	
 }
