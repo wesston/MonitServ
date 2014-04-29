@@ -123,6 +123,17 @@ char* uptime() {
     return uptime;
 }
 
+char* techstat() {
+
+	char *tech;
+	int i;
+	
+	tech = (char *)malloc(40 * sizeof(char));
+	sprintf(tech, "%d %d %d %s", cpuinfo(), meminfo(), diskinfo(), uptime());
+	
+	return tech;
+}
+
 int main() {
 
 	struct sockaddr_in c_addr;
@@ -152,7 +163,6 @@ int main() {
 	}
 	
 	close(sock);
-	
 		
 	return 0;	
 }
