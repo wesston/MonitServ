@@ -60,50 +60,48 @@ int meminfo() {
 int diskinfo() {
 	//DiskUsage
 	FILE *f;
+	char *cmd = "df -h";
 	char buf[200];
 	int i = 0;
 	int diskState;
 	char *p1;
-	
-	system("df -h > DiskInfo.txt");
-	f = fopen("DiskInfo.txt", "r");
+
+	f = popen (cmd, "r");
 	if (!f) {
-		perror("open (DiskInfo.txt)");
-		close(f);
-		return 1;
+		perror("popen");
+		exit(1);
 	}
-		
+
 	for(i = 0; i < 2; i++) {
 		fgets(buf, sizeof(buf) - 1, f);
 		
 		if (i == 1) {
 			p1 = strchr(buf, '%');
 			*p1 = 0;
+			
 			while (*p1 != ' ') {
 				p1--;
 			}
 		}
-							
 	}
 	
 	diskState = atoi(p1);
-	fclose(f);
+	pclose(f);
 	 
 	return diskState;
 }
 
 char* uptime() {
 	FILE *f;
+	char *cmd = "uptime";
 	char buf[50];
 	char *p1, *p2, *uptime;
 	int len;
 	
-	
-	system("uptime > uptime.txt");
-	f = fopen("uptime.txt", "r");
+	f = popen(cmd, "r");
 	if (!f) {
-		perror("open (uptime.txt)");
-		close(f);
+		perror("popen");
+		exit(1);
 	}
 	
 	fgets(buf, sizeof(buf) - 1, f);
@@ -118,7 +116,8 @@ char* uptime() {
 		exit(1);
 	}
 	
-	strncpy(uptime, p1, len);	
+	strncpy(uptime, p1, len);
+    pclose(f);
     
     return uptime;
 }
