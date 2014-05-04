@@ -5,13 +5,20 @@
 #include <string.h>
 #include <stdio.h>
 
+struct stat {
+	int cpuinfo;
+	int meminfo;
+	int diskinfo;
+	char uptime[20];
+};
+
 int main() {
-	char const *SWITCHOFF = "off"; 
-	char const *TECHSTAT = "techstat";
+
+	const char *TECHSTAT = "techstat";
 	struct sockaddr_in s_addr;
 	int listener, sock;
-	char buf[100], in[100], uptime[20];
-	int cpuInfo, memInfo, diskInfo;
+	char buf[100], in[100];
+
 
 	listener = socket(AF_INET, SOCK_STREAM, 0);
 	if (listener < 0) {
@@ -46,15 +53,16 @@ int main() {
 			
 			if (strcmp(in, TECHSTAT) == 0) {
 				send(sock, TECHSTAT, strlen(TECHSTAT) + 1, 0);
-				recv(sock, buf, sizeof(buf), 0);
+
+				struct stat *techstat = (struct stat *)malloc(sizeof(struct stat));
+				recv(sock, techstat, sizeof(struct stat), 0);
 				
 				puts("----------------------------------------------------------");
-				sscanf(buf, "%d %d %d %s", &cpuInfo, &memInfo, &diskInfo, uptime);
-				printf("[Загрузка CPU: %d%%] [Загрузка MEM: %d%%] \n[Заполнение диска: %d%%] [Время работы клиента: %s]\n", 
-						cpuInfo, memInfo, diskInfo, uptime);
+				printf("[Загрузка CPU: %d%%] [Загрузка MEM: %d%%] \n[Заполнение диска: %d%%] [Время работы:%s]\n", 
+						techstat->cpuinfo, techstat->meminfo, techstat->diskinfo, techstat->uptime);
 				puts("----------------------------------------------------------\n");
+
 			}
-			
 		}
 		
 		close(sock);

@@ -5,6 +5,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+struct stat {
+	int cpuinfo;
+	int meminfo;
+	int diskinfo;
+	char uptime[20];
+};
+
 int cpuinfo() {
 	//CPULOAD
 	FILE *f;
@@ -117,25 +124,32 @@ char* uptime() {
 	}
 	
 	strncpy(uptime, p1, len);
+	uptime[len] = '\0';
     pclose(f);
     
     return uptime;
 }
 
-char* techstat() {
+struct stat *techstat() {
 
-	char *tech;
-	int i;
-	
-	tech = (char *)malloc(40 * sizeof(char));
-	sprintf(tech, "%d %d %d %s", cpuinfo(), meminfo(), diskinfo(), uptime());
-	
-	return tech;
+	struct stat *techstat;
+	techstat = (struct stat *)malloc(sizeof(struct stat));
+	if(techstat == NULL) {
+		printf("Требуемая память не выделена.\n");
+		exit(1);
+	}
+
+	techstat->cpuinfo = cpuinfo();
+	techstat->meminfo = meminfo();
+	techstat->diskinfo = diskinfo();
+	strcpy(techstat->uptime, uptime());
+
+	return techstat;
 }
 
 int main() {
-	char const *SWITCHOFF = "off";
-	char const *TECHSTAT = "techstat";
+
+	const char *TECHSTAT = "techstat";
 	struct sockaddr_in c_addr;
 	int sock;
 	char buf[100];
@@ -159,12 +173,13 @@ int main() {
 		
 		if(strcmp(buf, TECHSTAT) == 0) {
 			puts("Сервер запросил статистику!");
-			char const *STAT = techstat();
-			send(sock, STAT, strlen(STAT) + 1, 0);
+			struct stat *stat = techstat();
+			send(sock, stat, sizeof(struct stat), 0);
 		}
 	}
 	
 	close(sock);
-		
+
 	return 0;	
+
 }
